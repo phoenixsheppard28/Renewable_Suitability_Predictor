@@ -1,9 +1,10 @@
 # Renewable_Suitability_Predictor
-This Python package allows the user to predict site suitability for solar or wind energy installations by leveraging machine learning techniques and the NREL Physical Solar Model API (ver 3.2.2)  at 
-https://developer.nrel.gov/docs/solar/nsrdb/psm3-2-2-download/ 
+
+Python Package Index (PyPi): https://pypi.org/project/Renewable-Suitability-Predictor/
+
+This Python package allows the user to predict site suitability for solar or wind energy installations by leveraging machine learning techniques and the NREL Physical Solar Model API (ver 3.2.2)
 
 This package requires that you sign up for an API key at https://developer.nrel.gov/signup/. API rates and limits specified in the NREL documentation apply 
-
 
 To start, install the module with 
 
