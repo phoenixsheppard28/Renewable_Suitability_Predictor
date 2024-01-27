@@ -34,6 +34,7 @@ Both functions return a list of two things:
 
 
 ```interface_single_prediction``` uses terminal input from the user to predict the suitability of one location.
+
 ```interface_multi_prediction``` is for predicting the suitability of many different locations at once. 
 
 
