@@ -41,7 +41,7 @@ Both functions return a list of two things:
 
 
 ## Parameter Details
-```coordinates_array```: 2d array of shape (n,2). It contains pairs of cooridnates in the order [Latitude, Longitude]. Lat and lon should be given as type **float**.
+```coordinates_array```: 2d array-like of shape (n,2). It contains pairs of cooridnates in the order [Latitude, Longitude]. Lat and lon should be given as type **float**.
 Example:
 ```python
 coordinates_array = [
