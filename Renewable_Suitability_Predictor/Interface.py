@@ -1,0 +1,234 @@
+import requests
+import pandas as pd
+import numpy as np
+import io
+from backend_methods import get_wind_model_predictions, get_solar_model_predictions
+# single point then array or maybe just point
+#make a method that encompasses the whole thing so they dont have to do that stuff like enter it one by one 
+# they can enter an array of coordinates and model specifications like model_type='solar' and coordinates_array= something
+#
+#model_type should be either 'solar' or 'wind'
+#coordinates_array should be a 2d array of coordinate pairs in floats in order lat,lon
+
+def make_wkt(lat, lon):
+        wkt_point = f"POINT({lon} {lat})"
+        return wkt_point
+
+def interface_multi_prediction(coordinates_array, mode_type):
+
+    
+    mode_wind = False
+    mode_solar= False
+    pramaters={
+        "api_key":"LR4nu6g5mUZgN5oJqPOKFRj31bQCoHYcxdNKG2UU",  #replace with their key and email 
+        "email":"phoenixducky@gmail.com",
+        "interval":"60",  
+        "names":"2020"  # year for which data is extracted from, do not change
+    }
+
+    #making sure parameters are valid 
+    if(mode_type == 'solar'):
+        mode_solar=True
+    elif(mode_type == 'wind'):
+        mode_wind=True
+    else: 
+        raise Exception("Invalid mode type, please pass either 'solar' or 'wind'")
+    
+    if(np.shape(coordinates_array)[1]!=2):
+        raise Exception("Invalid coordinates array, please pass a 2d array of shape n,2 ")
+
+    #transforming= averaging part? 
+    #maybe make 1 df and concatenate them on top of each other
+
+    AVG_dic={ 
+        "Temperature": [],
+        "Relative_Humidity": [],
+        "Pressure":[],
+        }
+    val_list=[]
+
+    if(mode_wind==True):
+        AVG_dic["Wind_Speed"]=[]
+
+        val_list.append("Latitude")
+        val_list.append("DNI Units")
+        val_list.append("Temperature Units")
+        val_list.append("Precipitable Water Units")
+
+    elif(mode_solar==True):
+        AVG_dic["GHI"] = []
+
+        val_list.append("Latitude")
+        val_list.append("DNI Units")
+        val_list.append("Temperature Units")
+        val_list.append("DHI Units")
+
+
+    # print(AVG_dic["Temperature"])
+    # print(val_list)
+    # print(df.head(5))
+    # print(pd.to_numeric(df[val_list[0]]).mean())
+
+    
+
+    
+    for pair in coordinates_array:
+        if ( (isinstance(pair[0],float)) & (isinstance(pair[1],float)) ):
+            temp_wkt= (make_wkt(pair[0],pair[1]))  # adding them to a list of WKT to check for 
+
+            print(f"Starting request for {pair} ...")
+
+            r=requests.get(f"http://developer.nrel.gov/api/nsrdb/v2/solar/psm3-download.csv?wkt={temp_wkt}",params=pramaters) #replace with psm3-2-2-download.csv... for new api
+            #maybe need new api link this one is depreacited
+            print("Finished!")
+            df=pd.read_csv(io.StringIO(r.content.decode('utf-8'))) 
+            df=df.iloc[2:]
+
+            
+            if(df.columns.values.tolist()[9]=="Data processing failure.]}"):  #or need to find a different status code that means its bad becasue 400 is all encompassing
+                raise Exception(f"Coordinate pair '{pair}' at index {coordinates_array.index(pair)} is not within the range of the api")
+            elif(r.status_code==400):
+                raise Exception("There is a problem with the API or your key. Please check the API and your key's activation status. Please also verify that your paremeters are valid.")
+            elif(r.status_code==200):
+                count=0
+                for i in AVG_dic.keys():
+                    AVG_dic[i].append(pd.to_numeric(df[val_list[count]]).mean()) 
+                    count+=1
+
+            else:
+                print(f"other error, status code: {r.status_code}")
+        
+        else:    
+            raise Exception("Invalid coordinates array, each pair of coordinates must be given as floats")
+
+    coordinates_array = np.array(coordinates_array)
+
+    true_frame=pd.DataFrame(AVG_dic)
+    true_frame.insert(0,"Latitude",coordinates_array[:,0])
+    true_frame.insert(1,"Longitude",coordinates_array[:,1])
+    true_frame.insert(6,"Probability",None) #will be filled in by the model 
+    true_frame.insert(7,"Suitability",-1)  #no brackets for both becasue it will fill in the whole column
+
+    
+
+    if(mode_wind==True):
+        return get_wind_model_predictions(true_frame)
+    elif(mode_solar==True):
+        return get_solar_model_predictions(true_frame)
+
+
+
+
+    
+
+    
+    
+
+#maybe make a method overload version or something to check if parameters are passed
+def interface_single_prediction():
+    pramaters={
+        "api_key":"LR4nu6g5mUZgN5oJqPOKFRj31bQCoHYcxdNKG2UU",  #replace with their key and email 
+        "email":"phoenixducky@gmail.com",
+        "interval":"60",
+        "names":"2020"
+    }
+
+
+
+    #starter stuff
+
+    mode_wind = False
+    mode_solar= False
+    print("Hello, this program will allow you to easily predict the suitability for a given coordiante")
+    while(True):
+        mode_input= str(input("Please enter your desired prediction type: 'wind' or 'solar' :"))
+
+        if(mode_input=='wind'):
+            mode_wind = True
+            break
+        elif(mode_input=='solar'):
+            mode_solar = True
+            break
+        print("Please enter a valid prediction type")
+
+
+    # coordinate part
+
+    while(True):
+        user_coordinates = list(map(float, input("Enter the Latitude and Longitude of the coordinate you wish to investigate (seperate each with a space): ").split()))
+        print(user_coordinates[0], user_coordinates[1])
+
+        coordinate= make_wkt(user_coordinates[0],user_coordinates[1])
+        print("Starting Request...")
+        r=requests.get(f"http://developer.nrel.gov/api/nsrdb/v2/solar/psm3-download.csv?wkt={coordinate}",params=pramaters)
+
+        print(r.status_code)
+
+        df=pd.read_csv(io.StringIO(r.content.decode('utf-8'))) #temp addition
+        if(df.columns.values.tolist()[9]=="Data processing failure.]}"):
+            print("Please enter a valid pair of coordinates within the contiguous United States")
+            continue
+        elif(r.status_code==400):
+            print("There is a problem with the API or your key. Please check the API and your key's activation status")
+            continue
+        break
+
+    print("Request Finished!")
+    df=pd.read_csv(io.StringIO(r.content.decode('utf-8')))
+
+    
+
+
+    #transforming/ averaging part
+    
+    AVG_dic={ 
+        "Temperature": [],
+        "Relative_Humidity": [],
+        "Pressure":[],
+        }
+    val_list=[]
+    if(mode_wind==True):
+        AVG_dic["Wind_Speed"]=[]
+
+        val_list.append("Latitude")
+        val_list.append("DNI Units")
+        val_list.append("Temperature Units")
+        val_list.append("Precipitable Water Units")
+
+    elif(mode_solar==True):
+        AVG_dic["GHI"] = []
+
+        val_list.append("Latitude")
+        val_list.append("DNI Units")
+        val_list.append("Temperature Units")
+        val_list.append("DHI Units")
+
+    df=df.iloc[2:]
+
+    
+
+    count=0
+    for i in AVG_dic.keys():
+        AVG_dic[i].append(pd.to_numeric(df[val_list[count]]).mean())
+        count+=1
+
+
+    true_frame=pd.DataFrame(AVG_dic)
+    true_frame.insert(0,"Latitude",[user_coordinates[0]])
+    true_frame.insert(1,"Longitude",[user_coordinates[1]])
+    true_frame.insert(6,"Probability",None) #will be filled in by the model 
+    true_frame.insert(7,"Suitability",-1)  #-1 means the suitability is unpredicted 
+
+
+    if(mode_wind==True):
+        return get_wind_model_predictions(true_frame)
+    elif(mode_solar==True):
+        return get_solar_model_predictions(true_frame)
+    #returns the dataframe with predicted suitability label and probability added, along with training metrics for the model
+
+
+
+
+
+
+
