@@ -49,3 +49,9 @@ coordinates_array = [
 ```
 
 ```model_type```: type **string**. Either ```'wind'``` or ```'solar'```. Specifies desired prediction type and whether the solar model or wind model should be used.
+
+```api_key```: type **string**. Recieved from the NREL when singing up. Required to interface with the API.
+
+```email```: type **string**. Email you used to recieve your API key. Required to interface with the API.
+
+```random_state```: type **int**. Used as initial seed for dataframe shuffling, train-test shuffling, and RFC. Used for reproducing function outputs. Default -1 means no set random state. If changed by user, ```random_state``` must be in range [0,4294967295]
