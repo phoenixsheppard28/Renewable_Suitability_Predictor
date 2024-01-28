@@ -28,8 +28,8 @@ These functions employ the techniques used in my research paper (https://doi.org
 2. Use the Typical Meteorological Year (TMY) to transform the time series data
 3. Use the Random Forest Classifier (RFC) algorithm to determine suitability
 
-Both functions return a list of two things: 
-1. A dataframe with the TMY data, prediction, and probability of the prediction for the coordinates they are given 
+Both functions return a list of two items: 
+1. A dataframe with the TMY data, prediction, and probability of the prediction for the coordinate(s) the functions are given 
 2. the metrics from training and testing the RFC model on the dataset used in my research project.
 
 
