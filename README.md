@@ -19,7 +19,7 @@ import Renwable-Suitability-Predictor as rsp
 
 This module provides the user with two functions 
 ```python
-interface_single_prediction(api_key,email,random_state=-1)
+interface_single_prediction(api_key, email, random_state=-1)
 
 interface_multi_prediction(coordinates_array, model_type, email, api_key, random_state=-1)
 ```
