@@ -6,13 +6,13 @@ This Python package allows the user to predict site suitability for solar or win
 
 This package requires that you sign up for an API key at https://developer.nrel.gov/signup/. API rates and limits specified in the NREL documentation apply 
 
-To start, install the module with 
+To start, install the module  
 
 ```sh 
 pip install Renewable-Suitability-Predictor
 ```
 
-Then import it with
+Then import it 
 ```python
 import Renwable-Suitability-Predictor as rsp
 ```
