@@ -46,7 +46,7 @@ Example:
 ```python
 coordinates_array = [
     [40.7128, -74.0060],   # New York City, NY
-    [34.0549, -118.2426],  # Los Angeles, CA
+    [34.0549, -118.2426]  # Los Angeles, CA
 ]
 ```
 
