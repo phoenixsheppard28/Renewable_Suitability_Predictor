@@ -23,7 +23,7 @@ interface_single_prediction(api_key, email, random_state=-1)
 
 interface_multi_prediction(coordinates_array, model_type, email, api_key, random_state=-1)
 ```
-These functions employ the methodologies used in my research paper (https://doi.org/10.58445/rars.682) . They perform 3 main jobs:
+These functions employ the techniques used in my research paper (https://doi.org/10.58445/rars.682) . They perform 3 main jobs:
 1. Gather 2020 meteorological data from the NREL Physical Solar Model API for each coordinate
 2. Use the Typical Meteorological Year (TMY) to transform the time series data
 3. Use the Random Forest Classifier (RFC) algorithm to determine suitability
