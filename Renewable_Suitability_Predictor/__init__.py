@@ -1,0 +1,1 @@
+from Renewable_Suitability_Predictor.Interface import interface_multi_prediction, interface_single_prediction
